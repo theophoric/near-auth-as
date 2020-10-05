@@ -1,6 +1,8 @@
 # Near Authentication middleware and Account proxy
-
+by @theophoric
 > Note :: I'm down to the wire on this submission so there is _minimal_ documentation, testing, presentation, etc.  That said the code works* (sort of, issues with gas limits) and there's a couple of examples to show how it works.  I intend to continue working on this project and have lots of plans for it.  
+
+tldr; check out [auth](/contracts/auth/main.ts) and [account](/contracts/account/main.ts)
 
 ## What?
 
@@ -22,8 +24,6 @@ Middleware
 Middleware component to check access, plus a 
 
 See usage examples in `contracts/account` and `contracts/greeter`
-
-
 
 ## How are keys secured
 
