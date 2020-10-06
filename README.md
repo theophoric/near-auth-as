@@ -2,7 +2,7 @@
 
 ## Submission for NEAR 🌈 Hackathon by [@theophoric](https://github.com/theophoric)
 
-*~NOTE TO REVIEWERS~*
+*NOTE TO REVIEWERS*
 
 This readme has been updated but the code has not been modified.  The commit immediately prior to the end of the hackathon can be found [here](https://github.com/theophoric/near-auth-as/tree/06b5a5aed7770413b332d275be26dcbe9bff4227).
 
