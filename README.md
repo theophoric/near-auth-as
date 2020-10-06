@@ -1,15 +1,52 @@
-# Near Authentication middleware and Account proxy 
+# Near Account Keys and Auth Middleware
 
 ## Submission for NEAR 🌈 Hackathon by [@theophoric](https://github.com/theophoric)
 
-NOTE :: The readme has been updated.  The project and readme prior to hackathon completion can be found [here](https://github.com/theophoric/near-auth-as/tree/06b5a5aed7770413b332d275be26dcbe9bff4227).  This document is the only change.
+*~NOTE TO REVIEWERS~*
 
-tldr; 
-- main code: [auth](/contracts/auth/main.ts)
-- examples:
-  - [greeter](/contracts/greeter/main.ts')
-  - [account](/contracts/account/main.ts)
-  - []
+This readme has been updated but the code has not been modified.  The commit immediately prior to the end of the hackathon can be found [here](https://github.com/theophoric/near-auth-as/tree/06b5a5aed7770413b332d275be26dcbe9bff4227).
+
+As of 10/6 I am still updating this readme and intend to have a video walkthrough / demo uploaded by EOD.  
+
+---
+
+## tl;dr
+
+> "Contract code for creating and authenticating `AccountKey`s: programmable `AccessKey`s at the application level; exposed as a proxy/standalone contract or through import, as demonstrated through two integration examples"
+
+- contracts:
+  - `auth` 
+    - main contract for submission
+    - can be used as an authentication middleware piece or as a standalone token manager
+    - methods are _not_ protected
+    - [code](/contracts/auth/main.ts)
+    - contract compiles to `out/auth.wasm`
+  - `greeter`
+    - basic integration example, based on "Near Greeter" boilerplate contract
+    - all methods are protected
+    - exposes token creation methods
+    - [code](/contracts/greeter/main.ts')
+    - contract compiles to `out/greeter.wasm`
+    - deploy auth standlone: `near deploy out/auth.wasm --initFunction init --initArgs "{}"`
+  - `account`
+    - more advanced intgration example, contract that exposes `Action` types as contract methods
+    - all methods are protected
+    - exposes token creation methods
+    - [code](/contracts/account/main.ts)
+    - contract compiles to `out/account.wasm`
+  - `auth_proxy`
+    - proxy authority integration example
+    - [code](/contracts/proxy_auth/main.ts)
+    - INCOMPLETE :: I had compile errors before submission so I just commented the code out.
+- build: `yarn build`
+  - compiles the examples in following to `out/`:
+    - `auth.wasm` :: standalone auth instance.  Can be used as an authentication proxy, or to test out account key creation.  contract methods are _not_ protected
+- deploy
+  - auth standalone/proxy: `near deploy out/auth.wasm --initFunction init --initArgs "{}"`
+  - greeter example: `near deploy out/greeter.wasm --initFunction init --initArgs "{}"`
+  - account example: `near deploy out/account.wasm --initFunction init --initArgs "{}"`
+
+---
 
 ## What?
 
@@ -97,8 +134,7 @@ function _check_access(fn: FunctionName): void {
 }
 ```
 
-A key thing to note here is that the actual `AccessKey` is not referenced for authentication.
-
+A key thing to note here is that the actual `AccessKey` is not referenced for authentication; it is only used as an external indicator of the permissions granted with `AccountKey`
 
 
 See usage in this modified `greeter` contract:
@@ -135,15 +171,12 @@ export function setGreeting(message: string): void {
 ```
 
 
-### How secure are the tokens?
-
-
-
-
 ## Usage
 
 
-As proxy :
+As proxy :  this option is only partially supported at present but the idea is that instead of installing auth in every contract it can be used as remote authority.
+
+e.g. 
 
 
 ### Auth standalone
@@ -154,7 +187,7 @@ As proxy :
 
 ### Greeter Example
 
-
+`
 See usage examples in `contracts/account` and `contracts/greeter`
 
 ## build instructions
@@ -164,7 +197,8 @@ Run `yarn build` > outputs to `out/*.wasm`
 
 ## next steps
 
-
+- add "whitelist" account option using blank account id
+  - the corresponding public key would be `ACCKEYXXXXXXX....XXXXXX` 
 - graph rendering of account inheritance, access keys, and account keys 
   - visual representation of access graph
   - for subsets of accounts that use auth,
