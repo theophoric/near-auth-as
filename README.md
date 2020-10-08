@@ -2,11 +2,11 @@
 
 ## Submission for NEAR 🌈 Hackathon by [@theophoric](https://github.com/theophoric)
 
-*~NOTE TO REVIEWERS~*
+*NOTE TO REVIEWERS*
 
 This readme has been updated but the code has not been modified.  The commit immediately prior to the end of the hackathon can be found [here](https://github.com/theophoric/near-auth-as/tree/06b5a5aed7770413b332d275be26dcbe9bff4227).
 
-As of 10/6 I am still updating this readme and intend to have a video walkthrough / demo uploaded by EOD.  
+As of 10/8 I am still updating this readme and intend to have a video walkthrough / demo uploaded by EOD.  
 
 ---
 
@@ -14,6 +14,9 @@ As of 10/6 I am still updating this readme and intend to have a video walkthroug
 
 > "Contract code for creating and authenticating `AccountKey`s: programmable `AccessKey`s at the application level; exposed as a proxy/standalone contract or through import, as demonstrated through two integration examples"
 
+
+
+- build: `yarn build` will build `auth.wasm`, `account.wasm` and `greeter.wasm` to `out/`; `proxy_auth` had compile issues at the time of project submission so it has been commented out.
 - contracts:
   - `auth` 
     - main contract for submission
@@ -21,6 +24,39 @@ As of 10/6 I am still updating this readme and intend to have a video walkthroug
     - methods are _not_ protected
     - [code](/contracts/auth/main.ts)
     - contract compiles to `out/auth.wasm`
+    - function interface:
+      - *init*
+        - `init(protectedFns: string[])`
+          - initialize auth with a list of functions that it will operate over
+          - must be initialized with root scope before functioning
+      - *read*
+        - `check(fn: string): void`
+          - asserts that current context is authorized to invoke function with name `fn`.  
+          - Contracts that integrate with `auth` can invoke this as a check before function execution.
+        - `can_call(account: string, fn: string): bool`
+          - non assertion version of `check` -- useful if integrating contract wants to do custom logic or methods
+          - used if auth is being used as a remote authority. (see [proxy_auth.ts](contracts/proxy_auth/main.ts)) for an example.
+        - `get_account_key(account: string)`
+          - return `AccountKey` for `account`, if it exists.
+        - `get_protected_functions(): string[]`
+          -  return list of registered function names.  
+        - `account_id_to_pk(account: string): Uint8Array`
+          - get the public key representation of an account id
+        - `pk_to_account_id(pk: Uint8Array): string`
+          - get the corresponding account id for a valid account key pk
+        - `pk_is_account_key(pk: Uint8Array): bool` 
+          - check if a given pk is a properly formatted account key pk
+      - *write*
+        - `add_account_key(account: string, allowance: u128, allowedFns: string[])`
+          - add a new account key based on provided `account`, `allowance`, and `allowedFns`
+          - if `*` is provided in the `allowedFns` list then all methods will be available.  This value is exposed as `ANY_FN`.
+          - presently this function is _not protected_ .  This is mostly to make things easier during development and deployment.  In the `greeter.ts` example and in `account.ts` these functions are wrapped and protected.
+        - `remove_account_key(account: string)`
+          - remove account key owned by `account`
+          - presently this function is _not protected_ inside of auth.
+        - `burn_account_key()`
+          - remove account key of invoking account
+          - presently this function is _not protected_ inside of auth ; but under normal operation, this should only be invokable by 
   - `greeter`
     - basic integration example, based on "Near Greeter" boilerplate contract
     - all methods are protected
@@ -28,6 +64,17 @@ As of 10/6 I am still updating this readme and intend to have a video walkthroug
     - [code](/contracts/greeter/main.ts')
     - contract compiles to `out/greeter.wasm`
     - deploy auth standlone: `near deploy out/auth.wasm --initFunction init --initArgs "{}"`
+    - interface:
+      - *init*
+        - `init()`
+          - must be invoked to set up auth
+      - *read*
+        - `getGreeting(accountId: string): string`
+          - get string keyed by account id
+          - _protected function_: only predecessors with a 
+      - *write*
+        - `getGreeting(message: string): void`
+          - set string keyed by sender account id
   - `account`
     - more advanced intgration example, contract that exposes `Action` types as contract methods
     - all methods are protected
@@ -38,9 +85,7 @@ As of 10/6 I am still updating this readme and intend to have a video walkthroug
     - proxy authority integration example
     - [code](/contracts/proxy_auth/main.ts)
     - INCOMPLETE :: I had compile errors before submission so I just commented the code out.
-- build: `yarn build`
-  - compiles the examples in following to `out/`:
-    - `auth.wasm` :: standalone auth instance.  Can be used as an authentication proxy, or to test out account key creation.  contract methods are _not_ protected
+
 - deploy
   - auth standalone/proxy: `near deploy out/auth.wasm --initFunction init --initArgs "{}"`
   - greeter example: `near deploy out/greeter.wasm --initFunction init --initArgs "{}"`
